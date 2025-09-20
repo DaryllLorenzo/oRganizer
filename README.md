@@ -18,8 +18,11 @@ Built with **Rust**, **egui** (for UI), and **rfd** (for native file dialogs).
 
 ## 🧱 Project Structure
 src/
+
 ├── main.rs          # Entry point — launches the UI
+
 ├── ui.rs            # UI layer — egui components and event handling
+
 ├── core.rs          # Core logic — file scanning, organizing, moving
 
 
