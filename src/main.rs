@@ -1,5 +1,5 @@
 mod ui; 
-
+mod core;
 use eframe::Result;
 
 fn main() -> Result<()> {
