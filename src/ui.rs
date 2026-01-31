@@ -79,7 +79,14 @@ impl eframe::App for ORganizer {
             // Mostrar conteo de archivos encontrados
             if !self.archivos_listados.is_empty() {
                 ui.add_space(10.0);
-                ui.label(format!(" Archivos encontrados: {}", self.archivos_listados.len()));
+                ui.separator();
+                ui.label(RichText::new("Archivos encontrados:").strong());
+                        
+                egui::ScrollArea::vertical().max_height(300.0).show(ui, |ui| {
+                    for archivo in &self.archivos_listados {
+                        ui.label(archivo);
+                    }
+                });
             }
         });
     }
