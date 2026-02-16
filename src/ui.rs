@@ -1,13 +1,14 @@
 use eframe::egui;
 use eframe::egui::RichText;
 use rfd::FileDialog;
-use crate::core::{FileOrganizerCore, OrganizerResult}; 
+use crate::core::{FileOrganizerCore, OrganizerResult};
 
 pub struct ORganizer {
     pub ruta_seleccionada: String,
     pub archivos_listados: Vec<String>,
     pub resultado_organizacion: Option<OrganizerResult>,
     pub mostrar_resumen: bool,
+    pub exclude_folders: String,
 }
 
 impl ORganizer {
@@ -17,6 +18,7 @@ impl ORganizer {
             archivos_listados: Vec::new(),
             resultado_organizacion: None,
             mostrar_resumen: false,
+            exclude_folders: String::new(),
         }
     }
 }
@@ -52,25 +54,32 @@ impl eframe::App for ORganizer {
 
             ui.add_space(15.0);
 
+            // Campo para excluir archivos/carpetas
+            ui.horizontal(|ui| {
+                ui.label("Archivos/Carpetas a excluir (separados por coma):");
+            });
+            ui.text_edit_singleline(&mut self.exclude_folders);
+
+            ui.add_space(10.0);
+
             // Botones de acción
             ui.horizontal(|ui| {
                 if ui.button("Listar Archivos").clicked() {
                     self.listar_archivos();
                 }
-                
+
                 if ui.button("Organizar por Extension").clicked() {
                     self.organizar_archivos();
                 }
-                
+
                 if ui.button("Limpiar").clicked() {
                     self.ruta_seleccionada.clear();
                     self.archivos_listados.clear();
                     self.resultado_organizacion = None;
                     self.mostrar_resumen = false;
+                    self.exclude_folders.clear();
                 }
             });
-
-            ui.add_space(10.0);
 
             // Mostrar resultados según el estado
             if self.mostrar_resumen {
@@ -104,13 +113,29 @@ impl ORganizer {
     fn organizar_archivos(&mut self) {
         if !self.ruta_seleccionada.is_empty() {
             println!("Organizando archivos en: {}", self.ruta_seleccionada);
-            
-            match FileOrganizerCore::organize_by_extension(&self.ruta_seleccionada) {
+
+            // Parse the excluded folders from the input field
+            let excluded_folders: Vec<String> = self.exclude_folders
+                .split(',')
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .collect();
+
+            // Run the organization with exclusions
+            let result = FileOrganizerCore::organize_by_extension_with_progress_and_exclusions(
+                &self.ruta_seleccionada,
+                &excluded_folders,
+                |_current, _total| {
+                    // No progress updates needed - blocking operation
+                }
+            );
+
+            match result {
                 Ok(resultado) => {
                     println!("Organizacion completada exitosamente");
                     self.resultado_organizacion = Some(resultado);
                     self.mostrar_resumen = true;
-                    
+
                     // Actualizar lista de archivos después de organizar
                     self.listar_archivos();
                 }

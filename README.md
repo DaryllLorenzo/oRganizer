@@ -1,100 +1,99 @@
-# Organizer - Organizador de Archivos en Rust
+# Organizer - File Organizer in Rust
 
-Una aplicación de escritorio multiplataforma que escanea una carpeta seleccionada, agrupa archivos sueltos por su extensión y los organiza en subcarpetas categorizadas dentro de un directorio `Organizer/`.
+A cross-platform desktop application that scans a selected folder, groups loose files by their extension, and organizes them into categorized subfolders within an `Organizer/` directory.
 
-Construida con **Rust**, **egui** (para la interfaz gráfica) y **rfd** (para diálogos nativos de archivos).
+Built with **Rust**, **egui** (for the GUI interface) and **rfd** (for native file dialogs).
 
-## Características
+## Features
 
-- **Interfaz Gráfica**: Selección fácil de carpetas mediante diálogo nativo
-- **Organización Inteligente**: Escanea archivos sueltos (no carpetas) en el directorio seleccionado
-- **Auto-Categorización**: Crea carpetas nombradas por extensión de archivo (ej: `PDF`, `JPG`, `MP3`) dentro de `Organizer/`
-- **Archivos sin Extensión**: Maneja archivos sin extensiones en una carpeta `Sin_Extension`
-- **Movimiento Seguro**: Los archivos se mueven a sus respectivas carpetas
-- **Estadísticas Detalladas**: Muestra un reporte completo del proceso de organización
-- **Manejo de Errores**: Gestiona errores del sistema de archivos y los muestra al usuario
+- **GUI Interface**: Easy folder selection via native dialog
+- **Smart Organization**: Scans loose files (not folders) in the selected directory
+- **Auto-Categorization**: Creates folders named by file extension (e.g., `PDF`, `JPG`, `MP3`) inside `Organizer/`
+- **No Extension Files**: Handles files without extensions in a `Sin_Extension` folder
+- **Safe Moving**: Files are moved to their respective folders
+- **Detailed Statistics**: Shows a complete report of the organization process
+- **Error Handling**: Manages filesystem errors and displays them to the user
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 src/
-├── main.rs          # Punto de entrada — lanza la interfaz
-├── ui.rs            # Capa de interfaz — componentes egui y manejo de eventos
-└── core.rs          # Lógica principal — escaneo, organización y movimiento de archivos
+├── main.rs          # Entry point — launches the GUI interface
+├── ui.rs            # UI layer — egui components and event handling
+└── core.rs          # Core logic — scanning, organizing and moving files
 ```
 
-## Cómo Funciona
+## How It Works
 
-1. **Seleccionar Carpeta**: El usuario selecciona una carpeta objetivo mediante el botón "Seleccionar Carpeta..."
-2. **Listar Archivos**: Clic en "Listar Archivos" para ver todos los archivos y carpetas en el directorio seleccionado
-3. **Organizar Archivos**: Clic en "Organizar por Extension" para:
-   - Escanear la carpeta en busca de archivos (ignora subdirectorios y la carpeta Organizer)
-   - Crear directorio `Organizer/` si no existe
-   - Para cada archivo, extraer su extensión y crear la carpeta correspondiente
-   - Archivos sin extensiones van a la carpeta `Sin_Extension/`
-   - Mover archivos a sus carpetas correspondientes
-4. **Ver Resultados**: Ver archivos movidos, carpetas creadas y cualquier error encontrado
+1. **Select Folder**: User selects a target folder using the "Seleccionar Carpeta..." button
+2. **List Files**: Click "Listar Archivos" to view all files and folders in the directory
+3. **Organize Files**: Click "Organizar por Extension" to:
+   - Scan the folder for files (ignores subdirectories and the Organizer folder)
+   - Create `Organizer/` directory if it doesn't exist
+   - For each file, extract its extension and create the corresponding folder
+   - Move files without extensions to the `Sin_Extension/` folder
+   - Move files to their respective extension folders
+4. **View Results**: See moved files, created folders, and any errors found
 
-## Estructura de Directorios Creada
+## Directory Structure Created
 
-Después de la organización, la carpeta seleccionada contendrá:
+After organization, the selected folder will contain:
 
 ```
-CarpetaSeleccionada/
+SelectedFolder/
 ├── Organizer/
-│   ├── PDF/          # Todos los archivos .pdf
-│   ├── JPG/          # Todos los archivos .jpg/.jpeg  
-│   ├── TXT/          # Todos los archivos .txt
-│   ├── ZIP/          # Todos los archivos .zip
-│   ├── EXE/          # Todos los archivos .exe
-│   └── Sin_Extension/# Archivos sin extensiones
-└── (carpetas restantes y el Organizer)
+│   ├── PDF/          # All .pdf files
+│   ├── JPG/          # All .jpg/.jpeg files
+│   ├── TXT/          # All .txt files
+│   ├── ZIP/          # All .zip files
+│   ├── EXE/          # All .exe files
+│   └── Sin_Extension/# Files without extensions
+└── (remaining folders and the Organizer folder)
+```
 
-## Requisitos Previos
+## Prerequisites
 
-- Rust (versión estable) — https://rustup.rs
-- Cargo (gestor de paquetes de Rust)
+- Rust (stable version) — https://rustup.rs
+- Cargo (Rust package manager)
 
-## Compilar y Ejecutar
+## Build and Run
 
 ```bash
-git clone https://github.com/DaryllLorenzo/oRganizer.git
-cd oRganizer
 cargo run
 ```
 
-## Uso de la Aplicación
+## Using the Application
 
-1. Ejecuta la aplicación con `cargo run`
-2. Haz clic en "Seleccionar Carpeta..." para elegir la carpeta que deseas organizar
-3. Opcional: Haz clic en "Listar Archivos" para ver el contenido actual
-4. Haz clic en "Organizar por Extension" para iniciar el proceso de organización
-5. Revisa el resumen con las estadísticas de la operación
-6. Usa "Limpiar" para resetear la interfaz
+1. Run the application with `cargo run`
+2. Click "Seleccionar Carpeta..." to choose the folder you want to organize
+3. Optional: Click "Listar Archivos" to see current contents
+4. Click "Organizar por Extension" to start the organization process
+5. Review the summary with operation statistics
+6. Use "Limpiar" to reset the interface
 
-## Notas Importantes
+## Important Notes
 
-- La aplicación solo organiza archivos en el nivel superior del directorio seleccionado
-- No organiza archivos dentro de subcarpetas
-- No modifica la carpeta `Organizer/` si ya existe
-- Los archivos se mueven, no se copian (operación permanente)
-- Se recomienda hacer una copia de seguridad antes de organizar archivos importantes
+- The application only organizes files at the top level of the selected directory
+- Does not organize files inside subfolders
+- Does not modify the `Organizer/` folder if it already exists
+- Files are moved, not copied (permanent operation)
+- It's recommended to backup important files before organizing
 
-## Tecnologías Utilizadas
+## Technologies Used
 
-- **Rust**: Lenguaje de programación principal
-- **egui**: Biblioteca para interfaz gráfica de usuario
-- **rfd**: Diálogos nativos de archivos
-- **std::fs**: Operaciones del sistema de archivos de Rust
+- **Rust**: Main programming language
+- **egui**: GUI library
+- **rfd**: Native file dialogs
+- **std::fs**: Rust filesystem operations
 
-## Contribuir
+## Contributing
 
-1. Haz fork del repositorio
-2. Crea una rama para tu funcionalidad (`git checkout -b nueva-funcionalidad`)
-3. Haz commit de tus cambios (`git commit -am 'Agrega nueva funcionalidad'`)
-4. Push a la rama (`git push origin nueva-funcionalidad`)
-5. Crea un Pull Request
+1. Fork the repository
+2. Create a branch for your feature (`git checkout -b new-feature`)
+3. Commit your changes (`git commit -am 'Add new feature'`)
+4. Push to the branch (`git push origin new-feature`)
+5. Create a Pull Request
 
-## Licencia
+## License
 
-Este proyecto está bajo la licencia MIT. Ver el archivo `LICENSE` para más detalles.
+This project is licensed under the MIT License. See the `LICENSE` file for more details.

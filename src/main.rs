@@ -1,4 +1,4 @@
-mod ui; 
+mod ui;
 mod core;
 use eframe::Result;
 
@@ -7,6 +7,6 @@ fn main() -> Result<()> {
     eframe::run_native(
         "Selector de Ruta",
         options,
-        Box::new(|_cc| Ok(Box::new(ui::ORganizer::new()))), 
+        Box::new(|_cc| Ok(Box::new(ui::ORganizer::new()))),
     )
 }
