@@ -5,6 +5,19 @@ use std::collections::HashMap;
 // Define a callback type for progress updates
 pub type ProgressCallback = dyn Fn(usize, usize) + Send; // (current, total)
 
+/// Operation mode: either move (cut) or copy files
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum FileOperationMode {
+    Cut,  // Move files
+    Copy, // Copy files
+}
+
+impl Default for FileOperationMode {
+    fn default() -> Self {
+        FileOperationMode::Cut
+    }
+}
+
 pub struct FileOrganizerCore;
 
 impl FileOrganizerCore {
@@ -28,24 +41,29 @@ impl FileOrganizerCore {
     }
 
     /// Organiza archivos por extensión en una carpeta "Organizer"
-    pub fn organize_by_extension(path: &str) -> Result<OrganizerResult, String> {
+    pub fn organize_by_extension(path: &str, mode: FileOperationMode) -> Result<OrganizerResult, String> {
         // Call the new function with a no-op progress callback
-        Self::organize_by_extension_with_progress(path, &|_, _| {})
+        Self::organize_by_extension_with_progress(path, mode, &|_, _| {})
     }
 
     /// Organiza archivos por extensión en una carpeta "Organizer" con callback de progreso
-    pub fn organize_by_extension_with_progress<F>(path: &str, progress_callback: F) -> Result<OrganizerResult, String>
+    pub fn organize_by_extension_with_progress<F>(
+        path: &str,
+        mode: FileOperationMode,
+        progress_callback: F
+    ) -> Result<OrganizerResult, String>
     where
         F: Fn(usize, usize), // (current, total)
     {
         // Call the new function with an empty exclusion list
-        Self::organize_by_extension_with_progress_and_exclusions(path, &Vec::new(), progress_callback)
+        Self::organize_by_extension_with_progress_and_exclusions(path, mode, &Vec::new(), progress_callback)
     }
 
     /// Organiza archivos por extensión en una carpeta "Organizer" con callback de progreso y exclusiones
     pub fn organize_by_extension_with_progress_and_exclusions<F>(
-        path: &str, 
-        excluded_items: &[String], 
+        path: &str,
+        mode: FileOperationMode,
+        excluded_items: &[String],
         progress_callback: F
     ) -> Result<OrganizerResult, String>
     where
@@ -120,14 +138,20 @@ impl FileOrganizerCore {
                 created_folders += 1;
             }
 
-            // Mover archivo a la carpeta correspondiente
+            // Move or copy file to the corresponding folder
             let file_name = file_path.file_name()
                 .map(|n| n.to_string_lossy().to_string())
                 .unwrap_or_else(|| "archivo".to_string());
 
             let new_path = extension_folder.join(&file_name);
 
-            match fs::rename(file_path, &new_path) {
+            // Perform the operation based on mode
+            let operation_result = match mode {
+                FileOperationMode::Cut => fs::rename(file_path, &new_path),
+                FileOperationMode::Copy => fs::copy(file_path, &new_path).map(|_| ()),
+            };
+
+            match operation_result {
                 Ok(_) => {
                     moved_files += 1;
                     extension_map
@@ -141,8 +165,8 @@ impl FileOrganizerCore {
             }
         }
 
-        // Crear resumen de organización
-        let summary = Self::create_organization_summary(&extension_map, moved_files, created_folders);
+        // Create summary of organization
+        let summary = Self::create_organization_summary(&extension_map, moved_files, created_folders, mode);
 
         Ok(OrganizerResult {
             total_moved: moved_files,
@@ -200,13 +224,19 @@ impl FileOrganizerCore {
         extension_map: &HashMap<String, Vec<String>>,
         total_moved: usize,
         folders_created: usize,
+        mode: FileOperationMode,
     ) -> String {
+        let operation_name = match mode {
+            FileOperationMode::Cut => "movidos",
+            FileOperationMode::Copy => "copiados",
+        };
+        
         let mut summary = format!(
             "Organizacion completada\n\n\
-             Archivos movidos: {}\n\
+             Archivos {}: {}\n\
              Carpetas creadas: {}\n\n\
              Extensiones organizadas:\n",
-            total_moved, folders_created
+            operation_name, total_moved, folders_created
         );
         
         for (extension, files) in extension_map {

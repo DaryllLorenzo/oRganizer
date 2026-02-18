@@ -1,7 +1,7 @@
 use eframe::egui;
 use eframe::egui::RichText;
 use rfd::FileDialog;
-use crate::core::{FileOrganizerCore, OrganizerResult};
+use crate::core::{FileOrganizerCore, OrganizerResult, FileOperationMode};
 
 pub struct ORganizer {
     pub ruta_seleccionada: String,
@@ -9,6 +9,7 @@ pub struct ORganizer {
     pub resultado_organizacion: Option<OrganizerResult>,
     pub mostrar_resumen: bool,
     pub exclude_folders: String,
+    pub operation_mode: FileOperationMode,
 }
 
 impl ORganizer {
@@ -19,6 +20,7 @@ impl ORganizer {
             resultado_organizacion: None,
             mostrar_resumen: false,
             exclude_folders: String::new(),
+            operation_mode: FileOperationMode::Cut,
         }
     }
 }
@@ -62,14 +64,26 @@ impl eframe::App for ORganizer {
 
             ui.add_space(10.0);
 
+            // Operation mode selection
+            ui.label(RichText::new("Modo de operacion:").strong());
+            ui.horizontal(|ui| {
+                let cut_selected = ui.selectable_value(&mut self.operation_mode, FileOperationMode::Cut, "✂ Cortar (Mover)").changed();
+                if cut_selected {
+                    println!("Modo Cortar seleccionado - Los archivos se moveran");
+                }
+                
+                let copy_selected = ui.selectable_value(&mut self.operation_mode, FileOperationMode::Copy, "📋 Copiar").changed();
+                if copy_selected {
+                    println!("Modo Copiar seleccionado - Los archivos se copiaran");
+                }
+            });
+
+            ui.add_space(10.0);
+
             // Botones de acción
             ui.horizontal(|ui| {
                 if ui.button("Listar Archivos").clicked() {
                     self.listar_archivos();
-                }
-
-                if ui.button("Organizar por Extension").clicked() {
-                    self.organizar_archivos();
                 }
 
                 if ui.button("Limpiar").clicked() {
@@ -79,6 +93,24 @@ impl eframe::App for ORganizer {
                     self.mostrar_resumen = false;
                     self.exclude_folders.clear();
                 }
+            });
+
+            ui.add_space(5.0);
+            
+            // Organize buttons based on mode
+            ui.horizontal(|ui| {
+                let enabled = !self.ruta_seleccionada.is_empty();
+                ui.add_enabled_ui(enabled, |ui| {
+                    if ui.button("✂ Cortar y Organizar").clicked() {
+                        self.operation_mode = FileOperationMode::Cut;
+                        self.organizar_archivos();
+                    }
+                    
+                    if ui.button("📋 Copiar y Organizar").clicked() {
+                        self.operation_mode = FileOperationMode::Copy;
+                        self.organizar_archivos();
+                    }
+                });
             });
 
             // Mostrar resultados según el estado
@@ -112,7 +144,7 @@ impl ORganizer {
     
     fn organizar_archivos(&mut self) {
         if !self.ruta_seleccionada.is_empty() {
-            println!("Organizando archivos en: {}", self.ruta_seleccionada);
+            println!("Organizando archivos en: {} (modo: {:?})", self.ruta_seleccionada, self.operation_mode);
 
             // Parse the excluded folders from the input field
             let excluded_folders: Vec<String> = self.exclude_folders
@@ -121,9 +153,10 @@ impl ORganizer {
                 .filter(|s| !s.is_empty())
                 .collect();
 
-            // Run the organization with exclusions
+            // Run the organization with exclusions and the selected operation mode
             let result = FileOrganizerCore::organize_by_extension_with_progress_and_exclusions(
                 &self.ruta_seleccionada,
+                self.operation_mode,
                 &excluded_folders,
                 |_current, _total| {
                     // No progress updates needed - blocking operation
@@ -181,13 +214,19 @@ impl ORganizer {
         if let Some(resultado) = &self.resultado_organizacion {
             ui.add_space(10.0);
             ui.separator();
-            
+
             ui.heading("Resumen de Organizacion");
-            
+
+            // Show operation mode in the summary
+            let operation_text = match self.operation_mode {
+                FileOperationMode::Cut => "Archivos movidos:",
+                FileOperationMode::Copy => "Archivos copiados:",
+            };
+
             // Mostrar estadísticas principales
             ui.add_space(5.0);
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Archivos movidos:").strong());
+                ui.label(RichText::new(operation_text).strong());
                 ui.label(format!("{}", resultado.total_moved));
             });
             
