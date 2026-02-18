@@ -19,6 +19,7 @@ Built with **Rust**, **egui** (for the GUI interface) and **rfd** (for native fi
 ```
 src/
 ├── main.rs          # Entry point — launches the GUI interface
+├── cli.rs           # CLI entry point — command-line interface
 ├── ui.rs            # UI layer — egui components and event handling
 └── core.rs          # Core logic — scanning, organizing and moving files
 ```
@@ -64,12 +65,50 @@ cargo run
 
 ## Using the Application
 
-1. Run the application with `cargo run`
+### GUI Mode
+
+1. Run the application with `cargo run --bin oRganizerr`
 2. Click "Seleccionar Carpeta..." to choose the folder you want to organize
 3. Optional: Click "Listar Archivos" to see current contents
 4. Click "Organizar por Extension" to start the organization process
 5. Review the summary with operation statistics
 6. Use "Limpiar" to reset the interface
+
+### CLI Mode
+
+The CLI version allows you to organize files directly from the terminal.
+
+**Run the CLI:**
+
+```bash
+cargo run --bin organizer-cli <path> [OPTIONS]
+```
+
+**Arguments:**
+
+| Argument | Description |
+|----------|-------------|
+| `<path>` | Path to the directory to organize |
+
+**Options:**
+
+| Option | Description |
+|--------|-------------|
+| `-c, --copy` | Copy files instead of moving them (default is move) |
+| `-h, --help` | Print help information |
+
+**Examples:**
+
+```bash
+# Organize files in Downloads (move by default)
+cargo run --bin organizer-cli /home/user/Downloads
+
+# Organize files by copying them (keep originals)
+cargo run --bin organizer-cli /home/user/Downloads --copy
+
+# Show help
+cargo run --bin organizer-cli --help
+```
 
 ## Important Notes
 

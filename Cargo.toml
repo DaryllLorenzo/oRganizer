@@ -7,3 +7,7 @@ edition = "2024"
 egui = "0.32"
 eframe = "0.32"
 rfd = "0.15.4"
+
+[[bin]]
+name = "organizer-cli"
+path = "src/cli.rs"
